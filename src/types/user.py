@@ -1,10 +1,12 @@
 from typing import Self
 
-from pydantic import Field, EmailStr, model_validator
+from pydantic import Field, EmailStr, model_validator, field_validator
+from sqlalchemy import select
 from ulid import new
 
 from .base import DTO
 from .custom_types import PasswordStr, AlphaStr
+from src.database import User
 
 
 class UserBasic(DTO):
@@ -22,7 +24,22 @@ class UserBasic(DTO):
 
 
 class UserLoginForm(UserBasic):
-    ...
+
+    @field_validator('email', mode='after')
+    def email_validator(cls, email: str) -> str:
+        with User.session() as session:
+            user = session.scalar(select(User).filter_by(email=email))
+            if user is None:
+                raise ValueError('user not found')
+            return email
+
+    @model_validator(mode='after')
+    def validator(self) -> Self:
+        with User.session() as session:
+            user = session.scalar(select(User).filter_by(email=self.email))
+            if user is not None:
+                return self
+            raise ValueError('user not found')
 
 
 class UserRegisterForm(UserBasic):
@@ -37,6 +54,14 @@ class UserRegisterForm(UserBasic):
         title='User confirm password',
         examples=['Qwerty1!']
     )
+
+    @field_validator('email', mode='after')
+    def email_validator(cls, email: str) -> str:
+        with User.session() as session:
+            user = session.scalar(select(User).filter_by(email=email))
+            if user is not None:
+                raise ValueError('email is not unique')
+            return email
 
     @model_validator(mode='after')
     def validator(self) -> Self:
