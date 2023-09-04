@@ -33,14 +33,6 @@ class UserLoginForm(UserBasic):
                 raise ValueError('user not found')
             return email
 
-    @model_validator(mode='after')
-    def validator(self) -> Self:
-        with User.session() as session:
-            user = session.scalar(select(User).filter_by(email=self.email))
-            if user is not None:
-                return self
-            raise ValueError('user not found')
-
 
 class UserRegisterForm(UserBasic):
     name: AlphaStr = Field(

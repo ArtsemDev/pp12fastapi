@@ -20,7 +20,6 @@ router = APIRouter(
     path='/',
     status_code=status.HTTP_200_OK,
     response_model=List[CategoryDetail],
-    response_model_exclude={'posts'},
     name='Получение всех категорий',
 )
 async def get_all_categories(session: Session = get_db_session):
@@ -28,7 +27,7 @@ async def get_all_categories(session: Session = get_db_session):
     Возвращает информацию о всех категориях
 
     Ответ
-    -------
+    -----
     Список информации о категориях
 
     """

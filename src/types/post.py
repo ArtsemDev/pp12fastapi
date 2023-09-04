@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Self
+from typing import Self, Optional
 
 from pydantic import Field, PositiveInt, model_validator
 from slugify import slugify
@@ -28,14 +28,13 @@ class PostAddForm(PostBasic):
 
 
 class PostDetail(PostBasic):
-    slug: str = Field(
-        default=...,
+    slug: Optional[str] = Field(
+        default=None,
         min_length=4,
         max_length=164,
         title='Post slug'
     )
     author_id: str = Field(
-        default_factory=lambda: new().str,
         min_length=26,
         max_length=26,
         title='User unique identify',
@@ -44,8 +43,8 @@ class PostDetail(PostBasic):
     date_created: datetime = Field(
         default_factory=datetime.utcnow
     )
-    id: PositiveInt = Field(
-        default=...
+    id: Optional[PositiveInt] = Field(
+        default=None
     )
     is_published: bool = Field(
         default=False

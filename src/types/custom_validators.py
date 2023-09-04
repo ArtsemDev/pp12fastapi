@@ -14,3 +14,10 @@ def is_alpha_validator(v: str) -> str:
     if not v.isalpha():
         raise ValueError('can contain only letters')
     return v
+
+
+def is_positive_int_list(v: list[int]) -> list[int]:
+    min_value = min(v)
+    if min_value < 1:
+        raise ValueError('must be great then 0')
+    return v
