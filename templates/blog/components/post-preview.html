@@ -1,0 +1,13 @@
+<div class="post-preview">
+    <a href="{{ url_for('post_detail', slug=post.slug) }}">
+        <h2 class="post-title">{{ post.title }}</h2>
+        <h3 class="post-subtitle">{{ post.body.title()[:32] }}</h3>
+    </a>
+    <p class="post-meta">
+        Posted by
+        <a href="#!">{{ post.author.name }}</a>
+        {{ post.date_created.strftime('%d %m %Y') }}
+    </p>
+</div>
+<!-- Divider-->
+<hr class="my-4" />

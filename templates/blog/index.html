@@ -1,0 +1,20 @@
+{% extends 'blog/base.html' %}
+{% block title %}
+HOMEPAGE
+{% endblock %}
+
+{% block content %}
+<!-- Navigation-->
+{% include 'blog/components/nav.html' %}
+<!-- Page Header-->
+{% with %}
+{% set heading='HOME PAGE' %}
+{% set subheading='Home' %}
+{% set image=url_for('static', path='blog/assets/img/home-bg.jpg') %}
+{% include 'blog/components/header.html' %}
+{% endwith %}
+<!-- Main Content-->
+{% include 'blog/components/post-list.html' %}
+<!-- Footer-->
+{% include 'blog/components/footer.html' %}
+{% endblock %}
