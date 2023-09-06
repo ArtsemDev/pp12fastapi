@@ -1,11 +1,12 @@
 from typing import List
 
-from fastapi import APIRouter, status, Path, HTTPException
+from fastapi import APIRouter, status, Path, HTTPException, Depends
 from fastapi.responses import ORJSONResponse
+from fastapi_cache.decorator import cache
 from sqlalchemy.orm import Session
 
 from src.types import CategoryDetail, CategoryAddForm, PostDetail
-from src.dependencies import get_db_session
+from src.dependencies import get_db_session, get_category_or_404
 from src.database import Category, Post
 
 
@@ -22,15 +23,8 @@ router = APIRouter(
     response_model=List[CategoryDetail],
     name='Получение всех категорий',
 )
+@cache(expire=60)
 async def get_all_categories(session: Session = get_db_session):
-    """
-    Возвращает информацию о всех категориях
-
-    Ответ
-    -----
-    Список информации о категориях
-
-    """
     categories = session.query(Category).order_by(Category.id)
     return [CategoryDetail.model_validate(obj=category, from_attributes=True) for category in categories]
 
@@ -56,13 +50,10 @@ async def add_new_category(form: CategoryAddForm, session: Session = get_db_sess
     response_model=CategoryDetail,
     name='Получение категории'
 )
+@cache(expire=3600)
 async def get_category(
-        pk: int = Path(default=..., ge=1, examples=[1, 2, 3]),
-        session: Session = get_db_session
+        category: Category = get_category_or_404,
 ):
-    category = session.get(entity=Category, ident=pk)
-    if category is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='category not found')
     return CategoryDetail.model_validate(obj=category, from_attributes=True)
 
 
@@ -73,11 +64,8 @@ async def get_category(
     name='Получение постов категории'
 )
 async def get_category_posts(
-        pk: int = Path(default=..., ge=1, examples=[1, 2, 3]),
+        category: Category = get_category_or_404,
         session: Session = get_db_session
 ):
-    category = session.get(entity=Category, ident=pk)
-    if category is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='category not found')
-    posts = session.query(Post).filter_by(category_id=pk, is_published=True)
+    posts = session.query(Post).filter_by(category_id=category.id, is_published=True)
     return [PostDetail.model_validate(obj=post, from_attributes=True) for post in posts]

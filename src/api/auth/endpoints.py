@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from time import sleep
+
+from fastapi import APIRouter, HTTPException, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette import status
@@ -14,6 +16,16 @@ from src.utils import create_access_token, verify_password, create_hash_password
 router = APIRouter(prefix='/auth', tags=['Auth'])
 
 
+def save_user(form: UserDetail):
+    from time import sleep
+    sleep(10)
+    with User.session() as session:
+        user = User(**form.model_dump(exclude={'password'}))
+        user.password = create_hash_password(password=form.password)
+        session.add(user)
+        session.commit()
+
+
 @router.post(
     path='/register',
     status_code=status.HTTP_201_CREATED,
@@ -21,12 +33,9 @@ router = APIRouter(prefix='/auth', tags=['Auth'])
     response_model_exclude={'password'},
     name='Регистрация пользователя'
 )
-async def register(form: UserRegisterForm, session: Session = get_db_session):
+async def register(form: UserRegisterForm, background_tasks: BackgroundTasks):
     form = UserDetail(**form.model_dump(exclude={'confirm_password'}))
-    user = User(**form.model_dump(exclude={'password'}))
-    user.password = create_hash_password(password=form.password)
-    session.add(user)
-    session.commit()
+    background_tasks.add_task(save_user, form=form)
     return form
 
 

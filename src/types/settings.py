@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     DATABASE_URL: PostgresDsn
     SECRET_STR: SecretStr
+    REDIS_URL: RedisDsn
     CELERY_BROKER_URL: RedisDsn
     CELERY_RESULT_BACKEND: RedisDsn
     TOKEN_TYPE: str
